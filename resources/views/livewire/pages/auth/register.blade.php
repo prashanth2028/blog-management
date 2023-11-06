@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\jobs\WelcomeEmailJob;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
@@ -8,6 +9,7 @@ use Illuminate\Validation\Rules;
 use function Livewire\Volt\layout;
 use function Livewire\Volt\rules;
 use function Livewire\Volt\state;
+use Illuminate\Support\Facades\Mail;
 
 layout('layouts.guest');
 
@@ -30,6 +32,8 @@ $register = function () {
     $validated['password'] = Hash::make($validated['password']);
 
     event(new Registered($user = User::create($validated)));
+    // Mail::to($user->email)->send(new WelcomeMail($user->name));
+    WelcomeEmailJob::dispatch($user->email, $user->name);
 
     auth()->login($user);
 
